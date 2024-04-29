@@ -20,7 +20,7 @@ Poweri BI：提高数据可视化报表服务；
 
 数据仓库：使用HDFS + Hive + Spark + Doris + Power BI构建整体的数据仓库，如下图所示：
 
-![数据仓库架构图](../SZM_PF_BG_Analysis/image/数据仓库架构图.png)
+![数据仓库架构图](image/数据仓库架构图.png)
 
 
 
