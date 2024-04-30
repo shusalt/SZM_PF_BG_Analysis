@@ -24,6 +24,61 @@ Poweri BI：提高数据可视化报表服务；
 
 
 
+# 原始结构
+
+```json
+{
+    "total": 1337000,
+    "data": [
+        {
+            "deal_date": "2018-08-31 22:14:50",
+            "close_date": "2018-09-01 00:00:00",
+            "card_no": "CBEHFCFCG",
+            "deal_value": "0",
+            "deal_type": "地铁入站",
+            "company_name": "地铁五号线",
+            "car_no": "IGT-105",
+            "station": "布吉",
+            "conn_mark": "0",
+            "deal_money": "0",
+            "equ_no": "263032105"
+        },
+        {
+            "deal_date": "2018-08-31 22:13:39",
+            "close_date": "2018-09-01 00:00:00",
+            "card_no": "CBCEBDIJE",
+            "deal_value": "0",
+            "deal_type": "地铁入站",
+            "company_name": "地铁五号线",
+            "car_no": "IGT-105",
+            "station": "布吉",
+            "conn_mark": "0",
+            "deal_money": "0",
+            "equ_no": "263032105"
+        },
+        .....
+     ]
+    "page": 1,
+    "rows": 1000
+}
+```
+
+data说明：
+
+|     字段     |                说明                |
+| :----------: | :--------------------------------: |
+|  deal_date   |              刷卡日期              |
+|  close_date  |              关闭时间              |
+|   card_no    |                卡号                |
+|  deal_value  |              交易价值              |
+|  deal_type   | 出入站类型："地铁入站"、"地铁出站" |
+| company_name |             地铁线名称             |
+|    car_no    |             地铁列车号             |
+|   statiion   |               地铁站               |
+|  conn_mark   |              连续标记              |
+|  deal_money  |              实收金额              |
+|    equ_no    |              闸机编号              |
+
 # 指标需求：
 
 ```txt
@@ -49,7 +104,7 @@ Poweri BI：提高数据可视化报表服务；
 	每个站点入站闸机数量  		ads_station_in_equ_num_top
 	每个站点出站闸机数量    		ads_station_out_equ_num_top
 【体现各线路综合服务水平】 各线路进出站闸机数排行榜
-	各线路进站闸机数排行榜 		ads_line_in_equ_num_top.png
+	各线路进站闸机数排行榜 		ads_line_in_equ_num_top
 	各线路出站闸机数排行榜 		ads_line_out_equ_num_top
 【体现收入最多的车站】 出站交易收入排行榜   
 	ads_station_deal_day_top
@@ -64,4 +119,145 @@ Poweri BI：提高数据可视化报表服务；
 【体现线路拥挤程度】 上车以后还没下车，每分钟、小时每条线在线人数   
 	ads_on_line_min_top
 ```
+
+# 数据调研
+
+## 业务调研
+
+深圳地铁刷卡业务流程分析：
+
+- 入站刷卡业务过程
+
+  ```tex
+  入站一次，记录一次入站刷卡信息
+  ```
+
+- 出站刷卡业务过程
+
+  ```txt
+  出站一次，记录一次出站刷卡信息
+  ```
+
+## 统计需求分析
+
+根据统计需分析得出：
+
+所需业务过程：
+
+- 入站
+- 出站
+
+所需维度：
+
+- 地铁站
+- 卡号
+- 线路
+- 地铁站区间
+- 时间
+
+所需度量：
+
+- 人次（人数）
+- 金额
+- 耗时
+- 闸机数
+
+# 数据仓库分层设计
+
+数据仓库分层设计：
+
+- ODS：原始数据层
+- DWD：明细数据层
+- DWS：汇总数据层
+- ADS：数据应用层
+
+# 数据预处理与清洗
+
+原始数据为：
+
+```json
+{
+    "total": 1337000,
+    "data": [
+        {
+            "deal_date": "2018-08-31 22:14:50",
+            "close_date": "2018-09-01 00:00:00",
+            "card_no": "CBEHFCFCG",
+            "deal_value": "0",
+            "deal_type": "地铁入站",
+            "company_name": "地铁五号线",
+            "car_no": "IGT-105",
+            "station": "布吉",
+            "conn_mark": "0",
+            "deal_money": "0",
+            "equ_no": "263032105"
+        },
+        {
+            "deal_date": "2018-08-31 22:13:39",
+            "close_date": "2018-09-01 00:00:00",
+            "card_no": "CBCEBDIJE",
+            "deal_value": "0",
+            "deal_type": "地铁入站",
+            "company_name": "地铁五号线",
+            "car_no": "IGT-105",
+            "station": "布吉",
+            "conn_mark": "0",
+            "deal_money": "0",
+            "equ_no": "263032105"
+        },
+        .....
+     ]
+    "page": 1,
+    "rows": 1000
+}
+```
+
+抛弃total字段，page字段、rowss字段、去除data数据中只有9个字段的数据，让每一行只存储存储如下形式的数据：
+
+```txt
+        "deal_date": "2018-08-31 22:14:50",
+        "close_date": "2018-09-01 00:00:00",
+        "card_no": "CBEHFCFCG",
+        "deal_value": "0",
+        "deal_type": "地铁入站",
+        "company_name": "地铁五号线",
+        "car_no": "IGT-105",
+        "station": "布吉",
+        "conn_mark": "0",
+        "deal_money": "0",
+        "equ_no": "263032105"
+```
+
+使用PySpark进行深圳地铁数据预处理与清洗，将处理好的数据，以orc格式存储在HDFS中，架构如下：
+
+![预处理与清洗框架](image\预处理与清洗框架.png)
+
+
+
+# ODS层设计
+
+ODS层主要储存来原始的深圳地铁刷卡数据，保持原始数据或者经过预处理与清洗后的原始数据
+
+smz_data表：
+
+| 字段  | 说明 |
+| ----- | ---- |
+| total |      |
+|       |      |
+|       |      |
+
+
+
+# 多维数据模型设计
+
+多维
+
+步骤：
+
+- 选择业务过程
+- 声明粒度
+- 确认维度
+- 确定事实
+
+入站事实表：
 
