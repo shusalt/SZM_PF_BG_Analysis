@@ -173,6 +173,8 @@ data说明：
 
 # 数据预处理与清洗
 
+> 程序对应目录为：/SZM_PF_BG_Analysis/etl_pyspark
+
 原始数据为：
 
 ```json
