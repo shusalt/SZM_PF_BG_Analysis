@@ -173,7 +173,7 @@ data说明：
 
 # 数据预处理与清洗
 
-> 程序对应目录为：/SZM_PF_BG_Analysis/etl_pyspark
+> 程序对应目录为：/SzmPfBgAnalysis/etl_pyspark
 
 原始数据为：
 
@@ -240,15 +240,23 @@ data说明：
 
 ODS层主要储存来原始的深圳地铁刷卡数据，保持原始数据或者经过预处理与清洗后的原始数据
 
-smz_data表：
+> SQL脚本在：/SzmPfBgAnalysis/szm_sql
 
-| 字段  | 说明 |
-| ----- | ---- |
-| total |      |
-|       |      |
-|       |      |
+ods_smz_data(深圳地铁刷卡原始数据)：
 
-
+|     字段     |                说明                |  类型  |
+| :----------: | :--------------------------------: | :----: |
+|  deal_date   |              刷卡日期              | string |
+|  close_date  |              关闭时间              | string |
+|   card_no    |                卡号                | string |
+|  deal_value  |              交易价值              | string |
+|  deal_type   | 出入站类型："地铁入站"、"地铁出站" | string |
+| company_name |             地铁线名称             | string |
+|    car_no    |             地铁列车号             | string |
+|   statiion   |               地铁站               | string |
+|  conn_mark   |              连续标记              | string |
+|  deal_money  |              实收金额              | string |
+|    equ_no    |              闸机编号              | string |
 
 # 多维数据模型设计
 
