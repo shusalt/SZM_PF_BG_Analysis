@@ -79,7 +79,7 @@ data说明：
 |  deal_money  |              实收金额              |
 |    equ_no    |              闸机编号              |
 
-# 指标需求：
+# 指标需求
 
 ```txt
 【体现进站压力】 每站进站人次排行榜      
@@ -270,4 +270,58 @@ ods_smz_data(深圳地铁刷卡原始数据)：
 - 确定事实
 
 入站事实表：
+
+- 业务过程：入站事实
+- 粒度：一条入站记录
+- 维度：刷卡日期、卡号、地铁线名称、地铁列车号、地铁站
+- 事实：闸机编号
+
+出站事实表：
+
+- 业务过程：出站事实
+- 粒度：一条出站记录
+- 维度：刷卡日期、关闭时间、卡号、地铁线名称、地铁列车号、地铁站、连续标记
+- 事实：交易价值、实收金额、闸机编号
+
+地铁进出站总表
+
+- 业务过程：进出站事实（不包含巴士）
+- 粒度：一条出站记录
+- 维度：刷卡日期、关闭时间、卡号、地铁线名称、地铁列车号、地铁站、连续标记
+- 事实：交易价值、实收金额、闸机编号
+
+事实表概览：
+
+- dwd_fact_szt_in_out_detail  地铁进出站总表
+- dwd_fact_szt_in_detail      进站事实表
+- dwd_fact_szt_out_detail     出站事实表
+
+# Pyspark on hive
+
+## 拷贝相关文件
+
+将下列相关文件拷贝到./spark/conf目录下
+
+- hadoop的core-site.xml、hdfs-site.xml
+- hive的hive-site.xml
+
+将mysql驱动拷贝到./spark/jars目录下
+
+- mysql-connector-java-8.0.11.jar
+
+Pyspark初始化代码
+
+```python
+from pyspark.sql import SparkSession
+
+if __name__ == '__main__':
+    spark = SparkSession.builder \
+        .master("local[2]") \
+        .config("hive.metastore.uris", "thrift://172.20.10.3:9083") \
+        .appName("dwd") \
+        .enableHiveSupport() \
+        .getOrCreate()
+
+    print(spark.sql("show databases").show())
+```
 
