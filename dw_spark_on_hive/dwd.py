@@ -46,6 +46,7 @@ if __name__ == '__main__':
         equ_no
     from {APP}.dwd_fact_szt_in_out_detail
     where dt = '2024-05-02'
+        and deal_type = '地铁入站'
     order by deal_date;
     """
     print(spark.sql(dwd_fact_szt_in_detail_sql).count())
@@ -66,6 +67,7 @@ if __name__ == '__main__':
         equ_no 
     from {APP}.dwd_fact_szt_in_out_detail
     where dt = '2024-05-02'
+        and deal_type = '地铁出站'
     order by deal_date;
     """
     print(spark.sql(dwd_fact_szt_out_detail_sql).count())
