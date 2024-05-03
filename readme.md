@@ -325,6 +325,16 @@ if __name__ == '__main__':
     print(spark.sql("show databases").show())
 ```
 
+# Doris表的设计与映射
+
+将DWD表同步到Doris中
+
+表集合：
+
+- dwd_fact_szt_in_out_detail_doris(地铁进出站总表
+- dwd_fact_szt_in_detail_doris(地铁进站事实表)
+- dwd_fact_szt_out_detail(地铁出站事实表)
+
 
 
 
