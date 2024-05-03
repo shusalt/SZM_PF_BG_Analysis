@@ -292,9 +292,9 @@ ods_smz_data(深圳地铁刷卡原始数据)：
 
 事实表概览：
 
-- dwd_fact_szt_in_out_detail  地铁进出站总表
-- dwd_fact_szt_in_detail      进站事实表
-- dwd_fact_szt_out_detail     出站事实表
+- dwd_fact_szt_in_out_detail    地铁进出站总表
+- dwd_fact_szt_in_detail    地铁进站事实表
+- dwd_fact_szt_out_detail    地铁出站事实表
 
 # Pyspark on hive
 
@@ -324,4 +324,12 @@ if __name__ == '__main__':
 
     print(spark.sql("show databases").show())
 ```
+
+# 汇总模型(宽表)设计
+
+在DWS层设计一个汇总表(宽表)，汇总记录每卡每日的所有出行记录
+
+dws_card_record_day_wide(每卡每日行程记录宽表)
+
+
 
