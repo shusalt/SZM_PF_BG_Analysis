@@ -126,7 +126,8 @@ select
     equ_no
 from dwd_fact_szt_in_out_detail
 where dt = '2024-05-02'
-order by deal_date
+	and deal_type = '地铁入站'
+order by deal_date;
 
 
 
@@ -146,4 +147,5 @@ select
     equ_no 
 from dwd_fact_szt_in_out_detail
 where dt = '2024-05-02'
-order by deal_date
+	and deal_type = '地铁出站'
+order by deal_date;
