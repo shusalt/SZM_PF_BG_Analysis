@@ -325,11 +325,7 @@ if __name__ == '__main__':
     print(spark.sql("show databases").show())
 ```
 
-# 汇总模型(宽表)设计
 
-在DWS层设计一个汇总表(宽表)，汇总记录每卡每日的所有出行记录
-
-dws_card_record_day_wide(每卡每日行程记录宽表)
 
 
 
