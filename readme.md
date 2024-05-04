@@ -331,11 +331,52 @@ if __name__ == '__main__':
 
 表集合：
 
-- dwd_fact_szt_in_out_detail_doris(地铁进出站总表
+- dwd_fact_szt_in_out_detail_doris(地铁进出站总表)
 - dwd_fact_szt_in_detail_doris(地铁进站事实表)
-- dwd_fact_szt_out_detail(地铁出站事实表)
+- dwd_fact_szt_out_detail_doris(地铁出站事实表)
 
+dwd_fact_szt_in_out_detail_doris(地铁进出站总表)
 
+| column_name  | type           | describe     | column_type  |
+| ------------ | -------------- | ------------ | ------------ |
+| deal_date    | varchar(255)   | 刷卡日期     | key_column   |
+| close_date   | varchar(255)   | 关闭时间     | key_column   |
+| card_no      | varchar(255)   | 卡号         | key_column   |
+| deal_type    | varchar(255)   | 出入站类型   | key_column   |
+| company_name | varchar(255)   | 地铁线名称   | key_column   |
+| car_no       | varchar(255)   | 地铁列车号   | key_column   |
+| station      | varchar(255)   | 地铁站       | key_column   |
+| conn_mark    | varchar(255)   | 连续标记     | key_column   |
+| dt           | varchar(255)   | hive分区字段 | key_column   |
+| deal_value   | decimal(16, 2) | 交易价值     | value_column |
+| deal_money   | decimal(16, 2) | 实收金额     | value_column |
+| equ_no       | varchar(255)   | 闸机编号     | value_column |
 
+dwd_fact_szt_in_detail_doris(地铁进站事实表)
 
+| column_name  | type         | describe     | column_type  |
+| ------------ | ------------ | ------------ | ------------ |
+| deal_date    | varchar(255) | 刷卡日期     | key_column   |
+| card_no      | varchar(255) | 卡号         | key_column   |
+| company_name | varchar(255) | 地铁线名称   | key_column   |
+| car_no       | varchar(255) | 地铁列车号   | key_column   |
+| station      | varchar(255) | 地铁站       | key_column   |
+| dt           | varchar(255) | hive分区字段 | key_column   |
+| equ_no       | varchar(255) | 闸机编号     | value_column |
+
+dwd_fact_szt_out_detail_doris(地铁出站事实表)
+
+| column_name  | type           | describe     | column_type  |
+| ------------ | -------------- | ------------ | ------------ |
+| deal_date    | varchar(255)   | 刷卡日期     | key_column   |
+| close_date   | varchar(255)   | 关闭时间     | key_column   |
+| card_no      | varchar(255)   | 卡号         | key_column   |
+| company_name | varchar(255)   | 地铁线名称   | key_column   |
+| car_no       | varchar(255)   | 地铁列车号   | key_column   |
+| station      | varchar(255)   | 地铁站       | key_column   |
+| conn_mark    | varchar(255)   | 连续标记     | key_column   |
+| dt           | varchar(255)   | hive分区字段 | key_column   |
+| deal_value   | decimal(16, 2) | 交易价值     | value_column |
+| deal_money   | decimal(16, 2) | 实收金额     | value_column |
+| equ_no       | varchar(255)   | 闸机编号     | value_column |
 

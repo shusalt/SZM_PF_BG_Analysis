@@ -36,7 +36,7 @@ create table szm.dwd_fact_szt_in_detail_doris(
 	`dt` varchar(255) comment 'hive分区字段',
 	`equ_no` varchar(255) comment "闸机编号"
 ) 
-COMMENT "地铁进出站总表"
+COMMENT "地铁进站事实表"
 ENGINE=OLAP
 DUPLICATE KEY(`deal_date`, `card_no`, `company_name`, `car_no`, `station`, `dt`)
 DISTRIBUTED BY HASH(card_no) BUCKETS 1
@@ -74,19 +74,19 @@ curl --location-trusted -u root: \
     -H "Expect:100-continue" \
     -H "column_separator:," \
     -H "columns:deal_date,close_date,card_no,deal_value,deal_type,company_name,car_no,station,conn_mark,deal_money,equ_no,dt" \
-    -T part-00000-fa110c94-b529-41c2-826a-f5304ecd6cff-c000.csv \
+    -T part-00000-bb3ffe26-b95d-4bf5-8758-3c0d1eecbc3a-c000.csv \
     -XPUT http://172.20.10.3:8070/api/szm/dwd_fact_szt_in_out_detail_doris/_stream_load
 
 curl --location-trusted -u root: \
     -H "Expect:100-continue" \
     -H "column_separator:," \
     -H "columns:deal_date,card_no,company_name,car_no,station,equ_no,dt" \
-    -T part-00000-cc6b7449-6874-4773-9ff3-d1bd07ce4068-c000.csv \
+    -T part-00000-089eba11-ed8f-41e7-b9a6-15ac7b9131e2-c000.csv \
     -XPUT http://172.20.10.3:8070/api/szm/dwd_fact_szt_in_detail_doris/_stream_load
 
 curl --location-trusted -u root: \
     -H "Expect:100-continue" \
     -H "column_separator:," \
     -H "columns:deal_date,close_date,card_no,deal_value,company_name,car_no,station,conn_mark,deal_money,equ_no,dt" \
-    -T part-00000-da1a5d19-e3de-4e38-8519-1b2bdc3d1ce0-c000.csv \
+    -T part-00000-a27c3213-789b-4326-9100-57c4a9ce3f1d-c000.csv \
     -XPUT http://172.20.10.3:8070/api/szm/dwd_fact_szt_out_detail_doris/_stream_load
