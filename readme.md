@@ -6,7 +6,7 @@
 
 # 深圳地铁客流分析架构
 
-## 技术架构：
+## 技术架构
 
 Hadoop HDFS：存储海量深圳地铁刷卡数据；
 
@@ -16,7 +16,7 @@ Doris：OLAP引擎，进行快速、高效的统计指标计算；
 
 Poweri BI：提高数据可视化报表服务；
 
-## 数据仓库架构：
+## 数据仓库架构
 
 数据仓库：使用HDFS + Hive + Spark + Doris + Power BI构建整体的数据仓库，如下图所示：
 
@@ -327,7 +327,7 @@ if __name__ == '__main__':
 
 # Doris的DWD层设计与映射
 
-将DWD表同步到Doris中
+将Hive的DWD层表同步到Doris中，使用Doris duplicate数据模型设计表
 
 表集合：
 
@@ -347,7 +347,7 @@ dwd_fact_szt_in_out_detail_doris(地铁进出站总表)
 | car_no       | varchar(255)   | 地铁列车号   | key_column   |
 | station      | varchar(255)   | 地铁站       | key_column   |
 | conn_mark    | varchar(255)   | 连续标记     | key_column   |
-| dt           | varchar(255)   | hive分区字段 | key_column   |
+| dt           | date           | hive分区字段 | key_column   |
 | deal_value   | decimal(16, 2) | 交易价值     | value_column |
 | deal_money   | decimal(16, 2) | 实收金额     | value_column |
 | equ_no       | varchar(255)   | 闸机编号     | value_column |
@@ -361,7 +361,7 @@ dwd_fact_szt_in_detail_doris(地铁进站事实表)
 | company_name | varchar(255) | 地铁线名称   | key_column   |
 | car_no       | varchar(255) | 地铁列车号   | key_column   |
 | station      | varchar(255) | 地铁站       | key_column   |
-| dt           | varchar(255) | hive分区字段 | key_column   |
+| dt           | date         | hive分区字段 | key_column   |
 | equ_no       | varchar(255) | 闸机编号     | value_column |
 
 dwd_fact_szt_out_detail_doris(地铁出站事实表)
@@ -375,8 +375,16 @@ dwd_fact_szt_out_detail_doris(地铁出站事实表)
 | car_no       | varchar(255)   | 地铁列车号   | key_column   |
 | station      | varchar(255)   | 地铁站       | key_column   |
 | conn_mark    | varchar(255)   | 连续标记     | key_column   |
-| dt           | varchar(255)   | hive分区字段 | key_column   |
+| dt           | date           | hive分区字段 | key_column   |
 | deal_value   | decimal(16, 2) | 交易价值     | value_column |
 | deal_money   | decimal(16, 2) | 实收金额     | value_column |
 | equ_no       | varchar(255)   | 闸机编号     | value_column |
+
+# Doris的ADS层统计报表设计
+
+根据指标需求，对统计指标进行计算，采用Doris Aggregate数据模型设计报表
+
+**ads_in_station_day_top(每站进站人次排行榜)**
+
+
 
