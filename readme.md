@@ -386,5 +386,46 @@ dwd_fact_szt_out_detail_doris(地铁出站事实表)
 
 **ads_in_station_day_top(每站进站人次排行榜)**
 
+| column_name    | type         | aggregationType | column_type  | describe |
+| -------------- | ------------ | --------------- | ------------ | -------- |
+| station        | varchar(255) |                 | key_column   | 站名     |
+| people_numbers | int          | sum             | value_column | 人次     |
 
+**ads_out_station_day_top(每站出站人次排行榜)**
+
+| column_name    | type         | aggregationType | column_type  | describe |
+| -------------- | ------------ | --------------- | ------------ | -------- |
+| station        | varchar(255) |                 | key_column   | 站名     |
+| people_numbers | int          | sum             | value_column | 人次     |
+
+**ads_in_out_station_day_top(每站进出站人次排行榜)**
+
+| column_name    | type         | aggregationType | column_type  | describe |
+| -------------- | ------------ | --------------- | ------------ | -------- |
+| station        | varchar(255) |                 | key_column   | 站名     |
+| people_numbers | int          | sum             | value_column | 人次     |
+
+**ads_card_deal_day_top(每卡日消费排行)**
+
+| column_name    | type           | aggregationType | column_type  | describe   |
+| -------------- | -------------- | --------------- | ------------ | ---------- |
+| card_no        | varchar(50)    |                 | key_column   | 卡号       |
+| dt             | date           |                 | key_column   | 每日分区号 |
+| deal_value_sum | decimal(16, 2) | sum             | value_column | 消费总额   |
+
+**ads_line_send_passengers_day_top(每线路单日运输乘客总次数排行榜，进站算一次，出站并且联程算一次)**
+
+| column_name             | type       | aggregationType | column_type  | describe   |
+| ----------------------- | ---------- | --------------- | ------------ | ---------- |
+| company_name            | vachar(50) |                 | key_column   | 地铁线路号 |
+| dt                      | date       |                 | key_column   | 每日分区号 |
+| passengers_number_total | int        | sum             | value_column | 乘客总次数 |
+
+**ads_stations_send_passengers_day_top(每日运输乘客最多的车站区间排行榜)** 
+
+| column_name             | type        | aggregationType | column_type  | describe   |
+| ----------------------- | ----------- | --------------- | ------------ | ---------- |
+| station_interval        | varchar(50) |                 | key_column   | 车站区间   |
+| dt                      | date        |                 | key_column   | 每日分区号 |
+| passengers_number_total | int         | sum             | value_column | 乘客总次数 |
 
