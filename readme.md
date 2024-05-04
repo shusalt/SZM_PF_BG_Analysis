@@ -325,7 +325,7 @@ if __name__ == '__main__':
     print(spark.sql("show databases").show())
 ```
 
-# Doris表的设计与映射
+# Doris的DWD层设计与映射
 
 将DWD表同步到Doris中
 
