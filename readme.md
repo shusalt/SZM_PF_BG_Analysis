@@ -89,7 +89,7 @@ data说明：
 【体现进出站压力】 每站进出站人次排行榜      
 	ads_in_out_station_day_top
 【体现通勤车费最多】 每卡日消费排行      
-	ads_card_deal_day_top  
+	ads_card_deal_day_top
 【体现线路运输贡献度】 每线路单日运输乘客总次数排行榜，进站算一次，出站并且联程算一次     
 	ads_line_send_passengers_day_top  
 【体现利用率最高的车站区间】 每日运输乘客最多的车站区间排行榜       
@@ -382,30 +382,46 @@ dwd_fact_szt_out_detail_doris(地铁出站事实表)
 
 # Doris的ADS层统计报表设计
 
-根据指标需求，对统计指标进行计算，采用Doris Aggregate数据模型设计报表
+根据指标需求，对统计指标进行计算;
 
-**ads_in_station_day_top(每站进站人次排行榜)**
+## ads_in_station_day_top
 
-| column_name    | type         | aggregationType | column_type  | describe |
-| -------------- | ------------ | --------------- | ------------ | -------- |
-| station        | varchar(255) |                 | key_column   | 站名     |
-| people_numbers | int          | sum             | value_column | 人次     |
+每站进站人次排行榜
 
-**ads_out_station_day_top(每站出站人次排行榜)**
+aggregate数据模型
 
 | column_name    | type         | aggregationType | column_type  | describe |
 | -------------- | ------------ | --------------- | ------------ | -------- |
 | station        | varchar(255) |                 | key_column   | 站名     |
 | people_numbers | int          | sum             | value_column | 人次     |
 
-**ads_in_out_station_day_top(每站进出站人次排行榜)**
+## ads_out_station_day_top
+
+每站出站人次排行榜
+
+aggregate数据模型
 
 | column_name    | type         | aggregationType | column_type  | describe |
 | -------------- | ------------ | --------------- | ------------ | -------- |
 | station        | varchar(255) |                 | key_column   | 站名     |
 | people_numbers | int          | sum             | value_column | 人次     |
 
-**ads_card_deal_day_top(每卡日消费排行)**
+## ads_in_out_station_day_top
+
+每站进出站人次排行榜
+
+aggregate数据模型
+
+| column_name    | type         | aggregationType | column_type  | describe |
+| -------------- | ------------ | --------------- | ------------ | -------- |
+| station        | varchar(255) |                 | key_column   | 站名     |
+| people_numbers | int          | sum             | value_column | 人次     |
+
+## ads_card_deal_day_top
+
+每卡日消费排行
+
+aggregate数据模式
 
 | column_name    | type           | aggregationType | column_type  | describe   |
 | -------------- | -------------- | --------------- | ------------ | ---------- |
@@ -413,7 +429,11 @@ dwd_fact_szt_out_detail_doris(地铁出站事实表)
 | dt             | date           |                 | key_column   | 每日分区号 |
 | deal_value_sum | decimal(16, 2) | sum             | value_column | 消费总额   |
 
-**ads_line_send_passengers_day_top(每线路单日运输乘客总次数排行榜，进站算一次，出站并且联程算一次)**
+## ads_line_send_passengers_day_top
+
+每线路单日运输乘客总次数排行榜，进站算一次，出站并且联程算一次
+
+aggregate数据模型
 
 | column_name             | type       | aggregationType | column_type  | describe   |
 | ----------------------- | ---------- | --------------- | ------------ | ---------- |
@@ -421,7 +441,11 @@ dwd_fact_szt_out_detail_doris(地铁出站事实表)
 | dt                      | date       |                 | key_column   | 每日分区号 |
 | passengers_number_total | int        | sum             | value_column | 乘客总次数 |
 
-**ads_stations_send_passengers_day_top(每日运输乘客最多的车站区间排行榜)** 
+## ads_stations_send_passengers_day_top
+
+每日运输乘客最多的车站区间排行榜
+
+aggregate数据模型
 
 | column_name             | type        | aggregationType | column_type  | describe   |
 | ----------------------- | ----------- | --------------- | ------------ | ---------- |
@@ -429,3 +453,109 @@ dwd_fact_szt_out_detail_doris(地铁出站事实表)
 | dt                      | date        |                 | key_column   | 每日分区号 |
 | passengers_number_total | int         | sum             | value_column | 乘客总次数 |
 
+## ads_line_single_ride_average_time_day_top
+
+每条线路单程直达乘客耗时平均值排行榜
+
+duplicate数据模型
+
+| column_name     | type        | column_type  | describe     |
+| --------------- | ----------- | ------------ | ------------ |
+| company_name    | varchar(50) | key_column   | 地铁线路     |
+| dt              | date        | key_column   | 每日分区号   |
+| avg_riding_time | int         | value_column | 平均乘坐时间 |
+
+## ads_all_passengers_single_ride_spend_time_average
+
+所有乘客从上车到下车间隔时间平均值
+
+aggregate数据模型
+
+| column_name       | type | aggregationType     | column_type  | describe       |
+| ----------------- | ---- | ------------------- | ------------ | -------------- |
+| dt                | date |                     | key_column   | 每日分区号     |
+| avg_interval_time | int  | replace if not null | value_column | 间隔时间平均值 |
+
+## ads_passenger_spend_time_day_top
+
+单日从上车到下车间隔时间排行榜 
+
+aggregate数据模型
+
+| column_name     | type        | aggregationType | column_type  | describe     |
+| --------------- | ----------- | --------------- | ------------ | ------------ |
+| card_no         | varchar(50) |                 | key_column   | 卡号         |
+| dt              | date        |                 | key_column   | 每日分区号   |
+| max_riding_time | int         | max             | value_column | 最大乘坐时间 |
+
+## 各个站点出入站闸机数据与各个地铁出入线路闸机数
+
+进站主题：
+
+ads_station_in_equ_num：
+
+duplicate数据模型
+
+| column_name  | type        | column_type  | describe     |
+| ------------ | ----------- | ------------ | ------------ |
+| company_name | varchar(50) | key_column   | 地铁线名     |
+| station      | varchar(50) | key_column   | 站名         |
+| dt           | date        | key_column   | 每日分区字段 |
+| equ_no_num   | int         | value_column | 闸机数       |
+
+每个站点入站闸机数量  ads_station_in_equ_num_top:
+
+```mysql
+select
+	station,
+	equ_no_num
+from ads_station_in_equ_num
+order by equ_no_num desc
+limit 10;
+```
+
+各线路进站闸机数统计排行榜 ads_line_in_equ_num_top
+
+```mysql
+select
+	company_name,
+	sum(equ_no_num) equ_no_num
+from ads_station_in_equ_num
+group by company_name
+order by equ_no_num desc
+limit 10;
+```
+
+进站主题：
+
+duplicate数据模型
+
+| column_name  | type        | column_type  | describe     |
+| ------------ | ----------- | ------------ | ------------ |
+| company_name | varchar(50) | key_column   | 地铁线名     |
+| station      | varchar(50) | key_column   | 站名         |
+| dt           | date        | key_column   | 每日分区字段 |
+| equ_no_num   | int         | value_column | 闸机数       |
+
+每个站点出站闸机数量 ads_station_out_equ_num_top:
+
+```mysql
+select
+	station,
+	equ_no_num
+from ads_station_out_equ_num
+order by equ_no_num desc
+limit 10;
+```
+
+各线路出站闸机数排行榜 ads_line_out_equ_num_top:
+
+```mysql
+select
+	company_name,
+	sum(equ_no_num) equ_no_num
+from ads_station_out_equ_num
+group by company_name
+order by equ_no_num desc
+limit 10;
+```

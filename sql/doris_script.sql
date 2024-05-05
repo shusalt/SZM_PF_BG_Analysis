@@ -297,3 +297,318 @@ from (
 		) tb2
 	) tb3
 where SUBSTR(deal_type_station, 1, 4) = '地铁入站' and SUBSTR(deal_type_station2, 1, 4) = '地铁出站';
+
+
+
+-- ads_line_single_ride_average_time_day_top(每条线路单程直达乘客耗时平均值排行榜)
+drop table if exists szm.ads_line_single_ride_average_time_day_top;
+create table szm.ads_line_single_ride_average_time_day_top(
+	`company_name` varchar(50) comment "地铁线路",
+	`dt` date comment "每日分区号",
+	`avg_riding_time` int comment "平均乘坐时间"
+)
+duplicate key(`company_name`, `dt`)
+distributed by hash(`company_name`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+
+insert into szm.ads_line_single_ride_average_time_day_top
+select
+	company_name,
+	dt,
+	avg(riding_time) avg_riding_time
+from (
+	select
+		-- 筛选出单程的记录
+		company_name,
+		dt,
+		-- 计算单程直达乘坐时间
+		round((unix_timestamp(deal_date2) - unix_timestamp(deal_date)) / 60) riding_time
+	from (
+		-- 选取下一个记录的时间、出入站类型，为计算单程做准备
+		select
+			card_no,
+			deal_date,
+			-- 去下一个记录的时间
+			lead(deal_date, 1, null) over(partition by card_no order by deal_date) deal_date2,
+			conn_mark,
+			deal_type,
+			company_name,
+			dt,
+			station,
+			deal_type_company,
+			-- 去下一个记录的deal_type_company
+			lead(deal_type_company, 1, null) over(partition by card_no order by deal_date) deal_type_company2
+		from (
+			-- 拼接: 出入站类型+地铁线路
+			select
+				card_no,
+				deal_date,
+				conn_mark,
+				deal_type,
+				company_name,
+				dt,
+				station,
+				concat_ws('@', deal_type, company_name) deal_type_company
+			from (
+				select
+					card_no,
+					deal_date,
+					conn_mark,
+					deal_type,
+					company_name,
+					dt,
+					station
+				from dwd_fact_szt_in_out_detail_doris
+				order by card_no, deal_date
+			) tb1
+		) tb2	
+	) tb3
+	-- 筛选出单程直达的数据
+	where SUBSTR(deal_type_company, 1, 4) = '地铁入站' 
+		and SUBSTR(deal_type_company2, 1, 4) = '地铁出站'
+		and conn_mark = '0'
+	order by card_no, deal_date	
+) tb4
+group by company_name, dt
+
+
+
+-- ads_all_passengers_single_ride_spend_time_average(所有乘客从上车到下车间隔时间平均值)
+drop table if exists szm.ads_all_passengers_single_ride_spend_time_average;
+create table ads_all_passengers_single_ride_spend_time_average(
+	`dt` date comment "每日分区号",
+	`avg_interval_time` int replace_if_not_null default "0" comment "间隔时间平均值"
+)
+aggregate keu(`dt`)
+distributed by hash(`avg_interval_time`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_all_passengers_single_ride_spend_time_average
+select
+	dt,
+	round(avg(riding_time)) avg_riding_time
+from (
+	select
+		dt,
+		round((unix_timestamp(deal_date2) - unix_timestamp(deal_date)) / 60) riding_time
+	from (
+		-- 选取下一个记录的时间、出入站类型，为计算单程做准备
+		select
+			card_no,
+			deal_date,
+			-- 去下一个记录的时间
+			lead(deal_date, 1, null) over(partition by card_no order by deal_date) deal_date2,
+			conn_mark,
+			deal_type,
+			company_name,
+			dt,
+			station,
+			deal_type_company,
+			-- 去下一个记录的deal_type_company
+			lead(deal_type_company, 1, null) over(partition by card_no order by deal_date) deal_type_company2
+		from (
+			-- 拼接: 出入站类型+地铁线路
+			select
+				card_no,
+				deal_date,
+				conn_mark,
+				deal_type,
+				company_name,
+				dt,
+				station,
+				concat_ws('@', deal_type, company_name) deal_type_company
+			from (
+				select
+					card_no,
+					deal_date,
+					conn_mark,
+					deal_type,
+					company_name,
+					dt,
+					station
+				from dwd_fact_szt_in_out_detail_doris
+				order by card_no, deal_date
+			) tb1
+		) tb2	
+	) tb3
+	-- 筛选出单程直达的数据
+	where SUBSTR(deal_type_company, 1, 4) = '地铁入站' 
+		and SUBSTR(deal_type_company2, 1, 4) = '地铁出站'
+	order by card_no, deal_date	
+) tb4
+group by dt;
+
+
+select * from ads_all_passengers_single_ride_spend_time_average
+
+
+-- ads_passenger_spend_time_day_top(单日从上车到下车间隔时间排行榜)
+drop table if exists ads_passenger_spend_time_day_top;
+create table ads_passenger_spend_time_day_top(
+	`card_no` varchar(50) comment "卡号",
+	`dt` varchar(50) comment "每日分区号",
+	`max_riding_time` int max default "0" comment "最大乘坐时间"
+)
+aggregate key(`card_no`, `dt`)
+distributed by hash(`card_no`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_passenger_spend_time_day_top
+select
+	-- 筛选出单程的记录
+	card_no,
+	dt,
+	-- 计算单程直达乘坐时间
+	round((unix_timestamp(deal_date2) - unix_timestamp(deal_date)) / 60) riding_time
+from (
+	-- 选取下一个记录的时间、出入站类型，为计算单程做准备
+	select
+		card_no,
+		deal_date,
+		-- 去下一个记录的时间
+		lead(deal_date, 1, null) over(partition by card_no order by deal_date) deal_date2,
+		conn_mark,
+		deal_type,
+		company_name,
+		dt,
+		station,
+		deal_type_company,
+		-- 去下一个记录的deal_type_company
+		lead(deal_type_company, 1, null) over(partition by card_no order by deal_date) deal_type_company2
+	from (
+		-- 拼接: 出入站类型+地铁线路
+		select
+			card_no,
+			deal_date,
+			conn_mark,
+			deal_type,
+			company_name,
+			dt,
+			station,
+			concat_ws('@', deal_type, company_name) deal_type_company
+		from (
+			select
+				card_no,
+				deal_date,
+				conn_mark,
+				deal_type,
+				company_name,
+				dt,
+				station
+			from dwd_fact_szt_in_out_detail_doris
+			order by card_no, deal_date
+		) tb1
+	) tb2	
+) tb3
+-- 筛选出单程直达的数据
+where SUBSTR(deal_type_company, 1, 4) = '地铁入站' 
+	and SUBSTR(deal_type_company2, 1, 4) = '地铁出站';
+
+
+
+
+-- ads_station_in_equ_num(进站主题)
+drop table if exists ads_station_in_equ_num;
+create table ads_station_in_equ_num(
+	`company_name` varchar(50) comment "地铁线名",
+	`station` varchar(50) comment "站名",
+	`dt` date comment "每日分区字段",
+	`equ_no_num` int comment "闸机数"
+)
+duplicate key(`company_name`, `station`, `dt`)
+distributed by hash(`company_name`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_station_in_equ_num
+select
+	company_name,
+	station,
+	dt,
+	count(distinct equ_no) equ_no_num
+from dwd_fact_szt_in_detail_doris dfsidd 
+group by company_name, station, dt
+
+
+
+-- 每个站点入站闸机数量  ads_station_in_equ_num_top:
+select
+	station,
+	equ_no_num
+from ads_station_in_equ_num
+order by equ_no_num desc
+limit 10;
+
+
+
+-- 各线路进站闸机数统计排行榜 ads_line_in_equ_num_top
+select
+	company_name,
+	sum(equ_no_num) equ_no_num
+from ads_station_in_equ_num
+group by company_name
+order by equ_no_num desc
+limit 10;
+
+
+
+-- ads_station_out_equ_num(出站主题)
+drop table if exists ads_station_out_equ_num
+create table ads_station_out_equ_num(
+	`company_name` varchar(50) comment "地铁线名",
+	`station` varchar(50) comment "站名",
+	`dt` date comment "每日分区字段",
+	`equ_no_num` int comment "闸机数"
+)
+duplicate key(`company_name`, `station`, `dt`)
+distributed by hash(`company_name`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_station_out_equ_num
+select
+	company_name,
+	station,
+	dt,
+	count(distinct equ_no) equ_no_num
+from dwd_fact_szt_out_detail_doris
+group by company_name, station, dt;
+
+
+-- 每个站点出站闸机数量 ads_station_out_equ_num_top:
+select
+	station,
+	equ_no_num
+from ads_station_out_equ_num
+order by equ_no_num desc
+limit 10;
+
+
+
+-- 各线路出站闸机数排行榜 ads_line_out_equ_num_top:
+select
+	company_name,
+	sum(equ_no_num) equ_no_num
+from ads_station_out_equ_num
+group by company_name
+order by equ_no_num desc
+limit 10;
