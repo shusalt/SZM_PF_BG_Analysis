@@ -559,3 +559,76 @@ group by company_name
 order by equ_no_num desc
 limit 10;
 ```
+
+## 各线路与站点收益统计表
+
+ads_deal_day_top
+
+aggregate数据模型
+
+| column_name      | type           | aggregationType | column_type  | describe   |
+| ---------------- | -------------- | --------------- | ------------ | ---------- |
+| company_name     | varchar(50)    |                 | key_column   | 地铁线路   |
+| station          | varchar(50)    |                 | key_column   | 站点       |
+| dt               | date           |                 | key_column   | 每日分区号 |
+| total_deal_value | decimal(16, 2) | sum             | value_column | 总收益     |
+| total_deal_money | decimal(16, 2) | sum             | value_column | 折后总收益 |
+
+各站点收益：
+
+```mysql
+select
+	station,
+	total_deal_value,
+	total_deal_money
+from ads_company_station_deal_day_top
+order by total_deal_value desc
+limit 10;
+```
+
+各路线收益：
+
+```mysql
+select
+	company_name,
+	sum(total_deal_value) total_deal_value,
+	sum(total_deal_money) deal_money
+from ads_company_station_deal_day_top
+group by company_name
+order by total_deal_value desc
+limit 10;
+```
+
+## ads_line_sale_ratio_top
+
+深圳地铁各线路直达乘客优惠人次百分比排行榜
+
+duplicate数据模型
+
+| column_name  | type        | column_type  | describe       |
+| ------------ | ----------- | ------------ | -------------- |
+| company_name | varchar(50) | key_column   | 地铁线路       |
+| dt           | date        | key_column   | 每日分区号     |
+| percentage   | float       | value_column | 优惠人次百分比 |
+
+## ads_conn_ratio_day_top
+
+深圳地铁各线路换乘出站乘客百分比排行榜
+
+duplicate数据模型
+
+| column_name  | type        | column_type  | describe           |
+| ------------ | ----------- | ------------ | ------------------ |
+| company_name | varchar(50) | key_column   | 地铁线路           |
+| dt           | date        | key_column   | 每日分区号         |
+| percentage   | float       | value_column | 换乘出站乘客百分比 |
+
+## ads_conn_spend_time_top
+
+深圳地铁换乘时间最久的乘客排行榜
+
+| column_name | type        | aggregationType | column_type  | describe     |
+| ----------- | ----------- | --------------- | ------------ | ------------ |
+| card_no     | varchar(50) |                 | key_column   | 地铁线路     |
+| dt          | date        |                 | key_column   | 每日分区号   |
+| riding_time | int         | max             | value_column | 最久换乘时间 |

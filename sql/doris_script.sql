@@ -612,3 +612,225 @@ from ads_station_out_equ_num
 group by company_name
 order by equ_no_num desc
 limit 10;
+
+
+
+
+-- ads_deal_day_top(各线路与站点收益统计表)
+drop table if exists ads_company_station_deal_day_top;
+create table ads_company_station_deal_day_top(
+	`company_name` varchar(50) comment "地铁线路",
+	`station` varchar(50) comment "站点",
+	`dt` date comment "每日分区号",
+	`total_deal_value` decimal(16, 2) sum default "0" comment "总收益",
+	`total_deal_money` decimal(16, 2) sum default "0" comment "折后总收益"
+)
+aggregate key(`company_name`, `station`, `dt`)
+distributed by hash(`company_name`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_company_station_deal_day_top
+select
+	company_name,
+	station,
+	dt,
+	deal_value,
+	deal_money
+from dwd_fact_szt_out_detail_doris;
+
+
+
+select
+	station,
+	total_deal_value,
+	total_deal_money
+from ads_company_station_deal_day_top
+order by total_deal_value desc
+limit 10;
+
+
+
+
+select
+	company_name,
+	sum(total_deal_value) total_deal_value,
+	sum(total_deal_money) deal_money
+from ads_company_station_deal_day_top
+group by company_name
+order by total_deal_value desc
+limit 10;
+
+
+
+
+-- ads_line_sale_ratio_top(深圳地铁各线路直达乘客优惠人次百分比排行榜)
+drop table if exists ads_line_sale_ratio_top;
+create table ads_line_sale_ratio_top(
+	`company_name` varchar(50) comment "地铁线路",
+	`dt` varchar(50) comment "每日分区号",
+	`percentage` float comment "优惠人次百分比"
+)
+duplicate key(`company_name`, `dt`)
+distributed by hash(`company_name`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_line_sale_ratio_top
+select
+	tb1.company_name,
+	tb1.dt,
+	round((ct2/ct1) * 100, 2) percentage
+from (
+	-- 各线路全部乘客数
+	select
+		company_name,
+		dt,
+		count(1) ct1
+	from dwd_fact_szt_out_detail_doris dfsodd
+	group by company_name, dt
+) tb1
+join (
+	-- 各个线路使用深圳通地铁卡优惠的乘客数
+	select
+		company_name,
+		dt,
+		count(1) ct2
+	from dwd_fact_szt_out_detail_doris dfsodd 
+	where conn_mark = '0' and deal_money != 0
+	group by company_name, dt
+) tb2
+on tb1.company_name = tb2.company_name and tb1.dt = tb2.dt;
+
+
+
+select
+	*
+from ads_line_sale_ratio_top
+order by percentage desc
+
+
+
+-- ads_conn_ratio_day_top(深圳地铁各线路换乘出站乘客百分比排行榜)
+drop table if exists ads_conn_ratio_day_top;
+create table ads_conn_ratio_day_top(
+	`company_name` varchar(50) comment "地铁线路",
+	`dt` varchar(50) comment "每日分区号",
+	`percentage` float comment "换乘出站乘客百分比"
+)
+duplicate key(`company_name`, `dt`)
+distributed by hash(`company_name`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_conn_ratio_day_top
+select
+	tb1.company_name,
+	tb1.dt,
+	round(ct2/ct1 * 100, 2)percentage
+from (
+	-- 各线路全部乘客数
+	select
+		company_name,
+		dt,
+		count(1) ct1
+	from dwd_fact_szt_out_detail_doris dfsodd
+	group by company_name, dt
+) tb1
+join (
+	-- 各线路换乘出站乘客数
+	select
+		company_name,
+		dt,
+		count(1) ct2
+	from dwd_fact_szt_out_detail_doris dfsodd 
+	where conn_mark = '1'
+	group by company_name, dt
+) tb2
+on tb1.company_name = tb2.company_name and tb1.dt = tb2.dt;
+
+
+select
+	*
+from ads_conn_ratio_day_top
+order by percentage desc;
+
+
+
+
+-- ads_conn_spend_time_top(深圳地铁换乘时间最久的乘客排行榜)
+drop table if exists ads_conn_spend_time_top;
+create table ads_conn_spend_time_top(
+	`card_no` varchar(50) comment "卡号", 
+	`dt` date comment "每日分区号",
+	`riding_time` int max default "0" comment "最久换乘时间"
+)
+aggregate key(`card_no`, `dt`)
+distributed by hash(`card_no`) buckets 1
+properties (
+	"replication_num" = "1"
+);
+
+
+
+insert into ads_conn_spend_time_top
+select
+	-- 筛选出单程的记录
+	card_no,
+	dt,
+	-- 计算单程直达乘坐时间
+	round((unix_timestamp(deal_date2) - unix_timestamp(deal_date)) / 60) riding_time
+from (
+	-- 选取下一个记录的时间、出入站类型，为计算单程做准备
+	select
+		card_no,
+		deal_date,
+		-- 去下一个记录的时间
+		lead(deal_date, 1, null) over(partition by card_no order by deal_date) deal_date2,
+		conn_mark,
+		deal_type,
+		company_name,
+		dt,
+		station,
+		deal_type_company_station,
+		-- 去下一个记录的deal_type_company
+		lead(deal_type_company_station, 1, null) over(partition by card_no order by deal_date) deal_type_company_station2
+	from (
+		-- 拼接: 出入站类型+地铁线路
+		select
+			card_no,
+			deal_date,
+			conn_mark,
+			deal_type,
+			company_name,
+			dt,
+			station,
+			concat_ws('@', deal_type, company_name, station) deal_type_company_station
+		from (
+			select
+				card_no,
+				deal_date,
+				conn_mark,
+				deal_type,
+				company_name,
+				dt,
+				station
+			from dwd_fact_szt_in_out_detail_doris
+			order by card_no, deal_date
+		) tb1
+	) tb2	
+) tb3
+-- 筛选出单程直达的数据
+where SUBSTR(deal_type_company_station, 1, 4) = '地铁出站' 
+	and SUBSTR(deal_type_company_station2, 1, 4) = '地铁入站'
+	and conn_mark = '1'
+	and substr(deal_type_company_station,12) != substr(deal_type_company_station2,12)
