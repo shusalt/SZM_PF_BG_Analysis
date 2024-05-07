@@ -386,7 +386,7 @@ dwd_fact_szt_out_detail_doris(地铁出站事实表)
 
 ## ads_in_station_day_top
 
-每站进站人次排行榜
+深圳地铁进站人次排行榜
 
 aggregate数据模型
 
@@ -397,7 +397,7 @@ aggregate数据模型
 
 ## ads_out_station_day_top
 
-每站出站人次排行榜
+深圳地铁出站人次排行榜
 
 aggregate数据模型
 
@@ -408,7 +408,7 @@ aggregate数据模型
 
 ## ads_in_out_station_day_top
 
-每站进出站人次排行榜
+深圳地铁进出站总人次排行榜
 
 aggregate数据模型
 
@@ -419,7 +419,7 @@ aggregate数据模型
 
 ## ads_card_deal_day_top
 
-每卡日消费排行
+深圳地铁乘客车费排行榜
 
 aggregate数据模式
 
@@ -431,7 +431,7 @@ aggregate数据模式
 
 ## ads_line_send_passengers_day_top
 
-每线路单日运输乘客总次数排行榜，进站算一次，出站并且联程算一次
+深圳地铁各线路单日发送旅客排行榜
 
 aggregate数据模型
 
@@ -443,7 +443,7 @@ aggregate数据模型
 
 ## ads_stations_send_passengers_day_top
 
-每日运输乘客最多的车站区间排行榜
+深圳地铁每日运输乘客最多的区间排行榜
 
 aggregate数据模型
 
@@ -455,7 +455,7 @@ aggregate数据模型
 
 ## ads_line_single_ride_average_time_day_top
 
-每条线路单程直达乘客耗时平均值排行榜
+深圳地铁每条线路单程直达乘客耗时平均值排行榜
 
 duplicate数据模型
 
@@ -467,7 +467,7 @@ duplicate数据模型
 
 ## ads_all_passengers_single_ride_spend_time_average
 
-所有乘客从上车到下车间隔时间平均值
+深圳地铁所有乘客通勤时间平均值
 
 aggregate数据模型
 
@@ -478,7 +478,7 @@ aggregate数据模型
 
 ## ads_passenger_spend_time_day_top
 
-单日从上车到下车间隔时间排行榜 
+深圳地铁所有乘客通勤时间排行榜
 
 aggregate数据模型
 
@@ -503,7 +503,7 @@ duplicate数据模型
 | dt           | date        | key_column   | 每日分区字段 |
 | equ_no_num   | int         | value_column | 闸机数       |
 
-每个站点入站闸机数量  ads_station_in_equ_num_top:
+深圳地铁每个站点进站闸机数量排行榜  ads_station_in_equ_num_top:
 
 ```mysql
 select
@@ -514,7 +514,7 @@ order by equ_no_num desc
 limit 10;
 ```
 
-各线路进站闸机数统计排行榜 ads_line_in_equ_num_top
+深圳地铁各线路进站闸机数量排行榜 ads_line_in_equ_num_top
 
 ```mysql
 select
@@ -537,7 +537,7 @@ duplicate数据模型
 | dt           | date        | key_column   | 每日分区字段 |
 | equ_no_num   | int         | value_column | 闸机数       |
 
-每个站点出站闸机数量 ads_station_out_equ_num_top:
+深圳地铁每个站点出站闸机数量排行榜 ads_station_out_equ_num_top:
 
 ```mysql
 select
@@ -548,7 +548,7 @@ order by equ_no_num desc
 limit 10;
 ```
 
-各线路出站闸机数排行榜 ads_line_out_equ_num_top:
+ 深圳地铁各线路出站闸机数量排行榜 ads_line_out_equ_num_top:
 
 ```mysql
 select
